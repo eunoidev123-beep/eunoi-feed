@@ -1,0 +1,32 @@
+{
+  "feed_version": "1.0",
+  "generated_at": "2026-07-15T00:00:00Z",
+  "core_app": {
+    "latest_version": "0.1.0",
+    "changelog_url": "",
+    "download_url": ""
+  },
+  "tools": [
+    {
+      "id": "my-plans",
+      "name": "My Plans",
+      "tagline": "Timers, quick capture, and daily planning in one place.",
+      "description": "A calm space to plan your day, run a focus timer, and jot down quick notes before they're forgotten.",
+      "category": "planning",
+      "type": "terminal",
+      "network_mode": "offline",
+      "author": "You",
+      "version": "0.1.0",
+      "price_usd": null,
+      "icon_url": "",
+      "screenshots": [],
+      "storefront_url": "",
+      "download_url": "",
+      "min_core_version": "0.1.0",
+      "memory_budget_mb": 2,
+      "changelog": [
+        { "version": "0.1.0", "date": "2026-07-15", "notes": "First version" }
+      ]
+    }
+  ]
+}
