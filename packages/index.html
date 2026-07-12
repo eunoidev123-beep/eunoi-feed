@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Notes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0c1322;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    #app {
+      max-width: 420px;
+      width: 100%;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.2rem; font-weight: 600; color: #27ccfe; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.7rem; color: #6b7280; margin-bottom: 1.5rem; }
+    textarea {
+      width: 100%;
+      height: 80px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+      color: #e2e8f0;
+      padding: 0.6rem;
+      font-size: 0.8rem;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 0.75rem;
+    }
+    textarea:focus { border-color: rgba(39,204,254,0.4); }
+    .btn {
+      padding: 0.45rem 1.2rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #27ccfe, #21a0c3);
+      color: white;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    #status { font-size: 0.65rem; color: #6b7280; margin-top: 0.5rem; min-height: 1em; }
+    .notes-list { margin-top: 1.25rem; }
+    .notes-list h2 { font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.5rem; font-weight: 500; }
+    .note-item {
+      padding: 0.5rem 0.6rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 0.4rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.7rem;
+      color: #d1d5db;
+      line-height: 1.4;
+    }
+    .note-item .ts { font-size: 0.6rem; color: #6b7280; display: block; margin-top: 0.2rem; }
+    .empty { font-size: 0.65rem; color: #4b5563; font-style: italic; }
+    .badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      background: rgba(39,204,254,0.1);
+      color: #27ccfe;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Quick Notes</h1>
+    <p class="subtitle">Pipeline test — storage + dashboard widget</p>
+
+    <textarea id="note-input" placeholder="Type a short note..."></textarea>
+    <button class="btn" id="btn-save" onclick="saveNote()">Save Note</button>
+    <div id="status"></div>
+
+    <div class="notes-list">
+      <h2>Recent Notes</h2>
+      <div id="notes-container"><span class="empty">No notes yet.</span></div>
+    </div>
+
+    <div class="badge" id="badge">notes: 0</div>
+  </div>
+
+  <script>
+    var NOTES_KEY = 'notes';
+    var notes = [];
+
+    var inputEl = document.getElementById('note-input');
+    var statusEl = document.getElementById('status');
+    var notesEl = document.getElementById('notes-container');
+    var badgeEl = document.getElementById('badge');
+
+    function renderNotes() {
+      if (notes.length === 0) {
+        notesEl.innerHTML = '<span class="empty">No notes yet.</span>';
+      } else {
+        var html = '';
+        var show = notes.slice(-10).reverse();
+        for (var i = 0; i < show.length; i++) {
+          var n = show[i];
+          html += '<div class="note-item">' + escapeHtml(n.text) +
+                  '<span class="ts">' + new Date(n.ts).toLocaleString() + '</span></div>';
+        }
+        notesEl.innerHTML = html;
+      }
+      badgeEl.textContent = 'notes: ' + notes.length;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function setStatus(msg, ms) {
+      statusEl.textContent = msg;
+      if (ms) setTimeout(function() { statusEl.textContent = ''; }, ms);
+    }
+
+    function saveNote() {
+      var text = inputEl.value.trim();
+      if (!text) { setStatus('Nothing to save.', 2000); return; }
+
+      var entry = { text: text, ts: Date.now() };
+      notes.push(entry);
+      inputEl.value = '';
+
+      if (window.eunoi && window.eunoi.storage) {
+        window.eunoi.storage.set(NOTES_KEY, notes).then(function() {
+          setStatus('Saved!', 1500);
+          renderNotes();
+          refreshWidget();
+        }).catch(function(err) {
+          setStatus('Storage error: ' + err, 3000);
+        });
+      } else {
+        setStatus('Saved (no bridge).', 1500);
+        renderNotes();
+      }
+    }
+
+    function refreshWidget() {
+      if (!window.eunoi || !window.eunoi.ui) return;
+      window.eunoi.ui.registerDashboardWidget({
+        id: 'quick-notes-widget',
+        render: function(container) {
+          var recent = notes.slice(-5).reverse();
+          if (recent.length === 0) {
+            container.innerHTML = '<div style="font-size:0.7rem;color:#6b7280;">No notes yet.</div>';
+            return;
+          }
+          var h = '';
+          for (var i = 0; i < recent.length; i++) {
+            var n = recent[i];
+            h += '<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.7rem;color:#d1d5db;">' +
+                 escapeHtml(n.text) +
+                 '<div style="font-size:0.55rem;color:#6b7280;margin-top:0.1rem;">' +
+                 new Date(n.ts).toLocaleString() + '</div></div>';
+          }
+          container.innerHTML = h;
+        }
+      });
+    }
+
+    function init() {
+      if (!window.eunoi || !window.eunoi.storage) {
+        renderNotes();
+        return;
+      }
+      window.eunoi.storage.get(NOTES_KEY).then(function(val) {
+        if (Array.isArray(val)) notes = val;
+        renderNotes();
+        refreshWidget();
+      }).catch(function() {
+        renderNotes();
+      });
+    }
+
+    inputEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveNote();
+    });
+
+    init();
+  </script>
+</body>
+</html>

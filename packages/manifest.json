@@ -1,0 +1,20 @@
+{
+  "id": "quick-notes",
+  "name": "Quick Notes",
+  "version": "0.1.0",
+  "author": "Eunoi Core Team",
+  "type": "feature",
+  "description": "Minimal note-saver for testing the plugin install pipeline. Stores short notes in plugin-scoped storage and renders a dashboard widget listing recent entries.",
+  "icon": "StickyNote",
+  "entry": "index.html",
+  "min_core_version": "0.1.0",
+  "memory_budget_mb": 2,
+  "network_mode": "offline",
+  "permissions": [],
+  "provides": ["quick-notes"],
+  "needs": [],
+  "publishes_events": [],
+  "subscribes_events": [],
+  "settings": [],
+  "commands": []
+}
