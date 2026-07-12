@@ -8,12 +8,12 @@
   },
   "tools": [
     {
-      "id": "my-plans",
-      "name": "My Plans",
-      "tagline": "Timers, quick capture, and daily planning in one place.",
-      "description": "A calm space to plan your day, run a focus timer, and jot down quick notes before they're forgotten.",
+      "id": "quick-notes",
+      "name": "Quick Notes",
+      "tagline": "Jot something down before you forget it.",
+      "description": "A simple box for quick thoughts, right on your dashboard.",
       "category": "planning",
-      "type": "terminal",
+      "type": "feature",
       "network_mode": "offline",
       "author": "You",
       "version": "0.1.0",
@@ -21,12 +21,10 @@
       "icon_url": "",
       "screenshots": [],
       "storefront_url": "",
-      "download_url": "",
+      "download_url": "https://eunoidev123-beep.github.io/eunoi-feed/packages/quick-notes-0.1.0.eunoiplugin",
       "min_core_version": "0.1.0",
       "memory_budget_mb": 2,
-      "changelog": [
-        { "version": "0.1.0", "date": "2026-07-15", "notes": "First version" }
-      ]
+      "changelog": [{ "version": "0.1.0", "date": "2026-07-15", "notes": "First version" }]
     }
   ]
 }
